@@ -3,8 +3,8 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* WIFI_SSID = "Vania";
-const char* WIFI_PASSWORD = "T3cn0l0g!@";
+const char* WIFI_SSID = "ID";
+const char* WIFI_PASSWORD = "PASSWORD";
 const String SERVER_BASE = "http://192.168.100.8:5000";
 
 const int SOIL_PIN = 34;
