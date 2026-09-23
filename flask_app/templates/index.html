@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Irrigação</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Sistema de Irrigação</h1>
+
+      <section class="cards">
+        <div class="card status-card">
+          <span class="label">Umidade do solo</span>
+          <strong id="moistureValue">0%</strong>
+        </div>
+
+        <div class="card status-card">
+          <span class="label">Última irrigação</span>
+          <strong id="lastIrrigation">--</strong>
+        </div>
+
+        <div class="card status-card warning" id="reservoirCard">
+          <span class="label">Reservatório</span>
+          <strong id="reservoirStatus">Normal</strong>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Alerta</h2>
+        <p id="alertMessage">Sistema pronto.</p>
+
+        <button id="reservoirFilledBtn" type="button">
+          Reservatório cheio
+        </button>
+      </section>
+    </main>
+
+    <script>
+      async function fetchStatus() {
+        try {
+          const response = await fetch('/api/status');
+          const data = await response.json();
+
+          const moisture = Number(data.moisture ?? 0);
+          const reservoirEmpty = Boolean(data.reservoir_empty);
+          const lastIrrigation = data.last_irrigation || 'Ainda não houve irrigação';
+          const alertMessage = data.alert_message || 'Sistema pronto.';
+
+          document.getElementById('moistureValue').textContent = `${moisture}%`;
+          document.getElementById('lastIrrigation').textContent = lastIrrigation;
+          document.getElementById('alertMessage').textContent = alertMessage;
+
+          const reservoirCard = document.getElementById('reservoirCard');
+          const reservoirStatus = document.getElementById('reservoirStatus');
+
+          if (reservoirEmpty) {
+            reservoirCard.classList.add('danger');
+            reservoirStatus.textContent = 'Vazio';
+          } else {
+            reservoirCard.classList.remove('danger');
+            reservoirStatus.textContent = 'Normal';
+          }
+        } catch (error) {
+          console.error('Erro ao buscar status:', error);
+        }
+      }
+
+      document.getElementById('reservoirFilledBtn').addEventListener('click', async () => {
+        await fetch('/api/reservoir/filled', { method: 'POST' });
+        await fetchStatus();
+      });
+
+      fetchStatus();
+      setInterval(fetchStatus, 5000);
+    </script>
+  </body>
+</html>
